@@ -1,0 +1,8 @@
+_book/
+_book/
+node_modules/
+*.log
+.env
+*.pem
+*.key
+.DS_Store

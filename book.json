@@ -1,0 +1,11 @@
+{
+  "title": "Linux & Docker — Dari VPS Kosong Sampai Production",
+  "author": "Anda",
+  "language": "id",
+  "root": ".",
+  "structure": {
+    "readme": "README.md",
+    "summary": "SUMMARY.md"
+  },
+  "plugins": ["-lunr", "-search", "search-pro", "copy-code-button", "codeblock-filename"]
+}

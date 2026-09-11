@@ -1,0 +1,9 @@
+root: ./
+
+structure:
+  readme: README.md
+  summary: SUMMARY.md
+
+title: "Linux & Docker — Dari VPS Kosong Sampai Production"
+description: "Panduan Ubuntu, Docker, dan operasional VPS sampai production."
+language: id
