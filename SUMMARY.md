@@ -36,3 +36,4 @@
 * [24. Backup & Disaster Recovery](24-backup-disaster-recovery.md)
 * [25. Monitoring Docker & VPS](25-monitoring-docker-vps.md)
 * [26. VPS & Docker Troubleshooting](26-vps-docker-troubleshooting.md)
+* [27. Studi Kasus TokoApp: Multi-Container Production Stack](27-studi-kasus-tokoapp.md)

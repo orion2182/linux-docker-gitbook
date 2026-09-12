@@ -160,17 +160,25 @@ $ sudo docker compose up -d --build
 $ sudo docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 ```
 
-Untuk multi-server / zero-downtime, lanjut ke CI/CD + registry (Bab 23), Git di sini fondasinya.
+Untuk multi-server atau zero-downtime, lanjutkan ke CI/CD dan registry (Bab 23). Git pada bab ini merupakan fondasinya.
 
-## Latihan
+## Fungsi Perintah
 
-1. Buat repo `server-config`, commit 3 config dummy dengan pesan yang benar.
-2. Buat branch, rusak 1 config, merge kembali dengan benar.
-3. Setup deploy key read-only, clone via SSH di VM lab.
-4. Tulis `apply.sh` yang pull + `nginx -t` + reload, gagal → batal.
-
-## Rangkuman
-
-- Git = mesin waktu config server.
-- Branch untuk coba, `main` selalu deployable, `pull --ff-only` di prod.
-- Key per server, secret tidak pernah di-commit.
+| Perintah | Fungsi |
+| --- | --- |
+| `git init` | Membuat repository Git baru pada direktori saat ini. |
+| `git clone` | Menyalin repository remote ke direktori lokal. |
+| `git status` | Menampilkan perubahan pada working tree dan staging area. |
+| `git add` | Memasukkan perubahan ke staging area; `git add -p` memilih perubahan secara interaktif. |
+| `git commit` | Menyimpan snapshot perubahan pada history repository. |
+| `git log` / `git show` | Membaca history dan detail sebuah commit. |
+| `git branch` / `git checkout` | Membuat, melihat, atau berpindah branch. |
+| `git merge` | Menggabungkan perubahan dari satu branch ke branch lain. |
+| `git fetch` | Mengambil objek dan referensi dari remote tanpa mengubah working tree. |
+| `git pull` | Mengambil perubahan remote dan menggabungkannya ke branch lokal. |
+| `git diff` | Membandingkan perubahan antar file, commit, atau branch. |
+| `git reset` | Memindahkan HEAD atau mengubah staging; gunakan opsi destruktif dengan sangat hati-hati. |
+| `git tag` | Memberi nama pada commit tertentu, biasanya untuk rilis. |
+| `git remote` | Melihat atau mengatur alamat repository remote. |
+| `ssh-keygen` / `ssh -T` | Membuat kunci SSH dan menguji autentikasi ke layanan Git. |
+| `cp` / `nginx -t` | Menyalin konfigurasi dan memvalidasi konfigurasi Nginx sebelum reload. |

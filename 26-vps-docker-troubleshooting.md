@@ -74,7 +74,7 @@ $ cat /proc/loadavg; nproc
 $ vmstat 1 5
 ```
 
-Bedakan `%us` (app), `%sy` (kernel), `%wa` (disk). Container biang = `stats` + `logs` + limit (Bab 19/21). Jangan reboot tanpa tahu siapa.
+Bedakan `%us` (aplikasi), `%sy` (kernel), dan `%wa` (I/O disk). Jika container menjadi sumber masalah, gunakan `stats`, `logs`, dan pemeriksaan limit (Bab 19/21). Jangan melakukan reboot sebelum sumber masalah diketahui.
 
 ## 7. High Memory
 
@@ -143,7 +143,7 @@ $ ls -la /var/lib/docker/volumes/<vol>/_data | head
 $ mount | grep <vol>
 ```
 
-Anonymous volume nyasar = data di tempat salah. `down -v` hapus volume = data hilang. Backup dulu sebelum prune/migrasi (Bab 15/24).
+Anonymous volume yang tidak teridentifikasi dapat menyimpan data di lokasi yang tidak diharapkan. `down -v` menghapus volume dan dapat menyebabkan kehilangan data. Buat backup sebelum prune atau migrasi (Bab 15/24).
 
 ## 13. Network Problem
 
@@ -192,23 +192,29 @@ $ sudo nginx -t; sudo tail -n 20 /var/log/nginx/error.log
 $ curl -v https://contoh.com 2>&1 | head -n 30
 ```
 
-Expired = renew gagal (port 80 tertutup / webroot salah / DNS pindah). Mixed content = app masih硬code `http://`. Redirect loop = `X-Forwarded-Proto` hilang + app paksa https.
+Sertifikat kedaluwarsa berarti proses renew gagal, misalnya karena port 80 tertutup, webroot salah, atau DNS berubah. Mixed content terjadi ketika aplikasi masih menggunakan URL `http://` secara hardcode. Redirect loop dapat terjadi karena `X-Forwarded-Proto` hilang sementara aplikasi memaksa HTTPS.
 
-## Template Laporan Insiden (copy-paste)
+## Fungsi Perintah Troubleshooting
 
-```text
-Waktu:
-Gejala:
-Perintah + output (ps/ss/df/logs/inspect):
-Perubahan terakhir (deploy/config/cron?):
-Dugaan lapisan:
-Fix 1 baris:
-Verifikasi (curl/health/monitor):
-Pencegahan (alert/backup/runbook):
-```
-
-## Rangkuman
-
-- Fakta dulu, restart belakangan. Satu perubahan satu test.
-- Hafalkan segitiga: `logs + inspect + events` (Docker), `ss + ip + curl` (network), `df + free + top` (resource).
-- Tiap insiden ditutup dengan alert + runbook, bukan cuma "sudah nyala lagi".
+| Perintah | Fungsi |
+| --- | --- |
+| `ssh -v` | Menampilkan detail negosiasi SSH untuk menemukan masalah koneksi, key, atau autentikasi. |
+| `systemctl status` | Memeriksa status service dan ringkasan error terakhir. |
+| `ss` | Memastikan service sedang listen pada port yang diharapkan. |
+| `ip` / `ping` | Memeriksa alamat, routing, dan keterjangkauan jaringan. |
+| `dig` / `resolvectl` | Mendiagnosis resolusi DNS. |
+| `ufw` / `iptables` | Memeriksa aturan firewall host dan chain Docker. |
+| `df` / `du` / `lsof` | Menemukan filesystem penuh, direktori terbesar, dan file terhapus yang masih dibuka proses. |
+| `top` / `ps` / `free` / `vmstat` | Menganalisis CPU, proses, RAM, swap, dan tekanan resource. |
+| `dmesg` | Memeriksa pesan kernel seperti OOM, error filesystem, dan device error. |
+| `docker ps` | Melihat container aktif atau yang berhenti. |
+| `docker logs` | Membaca stdout dan stderr container. |
+| `docker inspect` | Membaca exit code, status OOM, mount, network, dan healthcheck. |
+| `docker events` | Menghubungkan crash atau restart dengan event daemon. |
+| `docker system prune` | Membersihkan resource Docker yang tidak digunakan; lakukan setelah verifikasi karena dapat menghapus data yang tidak diperlukan lagi. |
+| `docker compose config` | Memvalidasi konfigurasi Compose final. |
+| `docker compose ps` / `logs` | Memeriksa status dan log service Compose. |
+| `curl` | Menguji endpoint langsung dari host atau melalui reverse proxy. |
+| `openssl s_client` | Memeriksa sertifikat, tanggal berlaku, dan negosiasi TLS. |
+| `certbot certificates` | Menampilkan sertifikat Let's Encrypt yang dikelola Certbot. |
+| `nginx -t` / `nginx -T` | Memvalidasi dan menampilkan konfigurasi Nginx yang efektif. |

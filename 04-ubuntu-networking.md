@@ -1,12 +1,12 @@
 # 04. Ubuntu Networking
 
-> Di Ubuntu modern, network dikendalikan Netplan. Salah spasi YAML bisa bikin SSH putus. Bab ini cara amannya.
+> Pada Ubuntu modern, network dikelola oleh Netplan. Kesalahan indentasi YAML dapat memutus koneksi SSH. Bab ini menjelaskan cara mengubahnya dengan aman.
 
 ## Tujuan Pembelajaran
 
 - Baca/tulis Netplan YAML dengan aman
 - Set static IP, DHCP, DNS, route, hosts, hostname
-- Recovery saat network mati total
+- Memulihkan network saat koneksi terputus total
 
 ## 1. Netplan
 
@@ -49,7 +49,7 @@ $ sudo netplan apply
 $ ip addr; ip route show default
 ```
 
-> Selalu pakai `netplan try` saat remote. Jangan `apply` buta.
+> Selalu gunakan `netplan try` saat mengubah konfigurasi melalui koneksi remote. Jangan menjalankan `apply` tanpa validasi.
 
 ## 3. DHCP
 
@@ -131,25 +131,27 @@ $ ip route get 10.99.5.5
 
 Kalau SSH putus setelah utak-atik:
 
-1. Pakai console VNC dari panel provider (jangan panik).
+1. Gunakan console VNC dari panel provider.
 2. Cek file YAML: `cat /etc/netplan/*.yaml`, perhatikan indent 2 spasi.
 3. Validasi: `sudo netplan generate`, `sudo netplan --debug apply`.
 4. Rollback: `sudo cp ~/netplan.bak/* /etc/netplan/ && sudo netplan apply`.
 5. Cek `ip addr`, `ip route`, `resolvectl status`, `ping 8.8.8.8`.
-6. Kalau cloud-init menimpa, cek `/etc/cloud/cloud.cfg.d/` dan `sudo cloud-init status`.
+6. Jika cloud-init menimpa konfigurasi, periksa `/etc/cloud/cloud.cfg.d/` dan jalankan `sudo cloud-init status`.
 
-Tips: sebelum edit remote, pasang `at` job rollback otomatis atau buka 2 sesi (satu `sleep 120 && reboot` sebagai parasut — hanya di lab!).
+Tips: sebelum mengedit server remote, siapkan job rollback menggunakan `at` atau gunakan dua sesi SSH. Uji pola ini di lab terlebih dahulu.
 
-## Latihan
+## Fungsi Perintah
 
-1. Backup Netplan, tampilkan `netplan status`, pahami tiap field.
-2. Di VM lab: ubah DHCP → static → kembali ke DHCP pakai `netplan try`.
-3. Tambah entry `/etc/hosts` palsu, buktikan dengan `getent hosts`, hapus lagi.
-4. Ganti hostname, reboot, pastikan prompt + `hostnamectl` konsisten.
-
-## Rangkuman
-
-- Netplan = satu sumber kebenaran network Ubuntu.
-- Remote wajib `try` sebelum `apply`, backup selalu.
-- DNS via Netplan/systemd-resolved, bukan edit manual.
-- Kuasai console provider sebelum butuh darurat.
+| Perintah | Fungsi |
+| --- | --- |
+| `netplan status` | Menampilkan status konfigurasi jaringan yang dikelola Netplan. |
+| `netplan generate` | Memvalidasi YAML dan menghasilkan konfigurasi backend tanpa menerapkannya. |
+| `netplan try` | Menerapkan konfigurasi sementara dan menyediakan rollback otomatis jika tidak dikonfirmasi. |
+| `netplan apply` | Menerapkan konfigurasi jaringan secara langsung. |
+| `ip addr` / `ip route` | Memeriksa alamat interface dan tabel routing setelah perubahan. |
+| `resolvectl` | Memeriksa resolver DNS yang sedang digunakan. |
+| `cat` | Membaca file Netplan, hosts, atau resolv.conf. |
+| `cp` | Menyalin file konfigurasi untuk backup atau rollback. |
+| `ping` | Menguji konektivitas ke gateway atau alamat internet. |
+| `hostnamectl` | Membaca atau mengubah hostname sistem. |
+| `cloud-init status` | Memeriksa status inisialisasi dan kemungkinan perubahan konfigurasi oleh cloud-init. |

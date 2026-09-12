@@ -43,7 +43,7 @@ $ systemd-cgls --no-pager | head -n 40
 $ cat /sys/fs/cgroup/system.slice/cpu.max 2>/dev/null || cat /sys/fs/cgroup/cpu/cpu.shares
 ```
 
-Tanpa cgroup limit, 1 container bocor bisa makan semua RAM (dibahas Bab 19/21).
+Tanpa batas cgroup, satu container yang mengalami kebocoran resource dapat menghabiskan seluruh RAM host (dibahas pada Bab 19/21).
 
 ## 4. OCI
 
@@ -100,18 +100,21 @@ $ docker rm -f demo
 $ docker ps -a
 ```
 
-Data di writable layer hilang saat `rm` kecuali pakai volume (Bab 15).
+Data pada writable layer akan hilang saat container dihapus dengan `rm`, kecuali data tersebut disimpan pada volume (Bab 15).
 
-## Latihan
+## Fungsi Perintah
 
-1. Jelaskan ke teman: kenapa `docker ps` start detik tapi VM menit? (kernel bersama + namespace).
-2. `lsns` + `systemd-cgls`, temukan cgroup proses kamu.
-3. Jalankan `nginx:alpine`, stop, start, rm. Bedakan `ps` vs `ps -a`.
-4. Gambar arsitektur CLI → dockerd → containerd → runc di kertas.
-
-## Rangkuman
-
-- VM virtualisasi hardware, container isolasi OS (namespace + cgroup).
-- OCI bikin ekosistem interoperable.
-- Docker = UX enak di atas containerd + runc.
-- Lifecycle dan beda image vs container wajib lekat sebelum Bab 11–12.
+| Perintah | Fungsi |
+| --- | --- |
+| `lsns` | Menampilkan namespace Linux yang sedang digunakan oleh proses. |
+| `unshare` | Menjalankan proses dengan namespace baru untuk eksperimen isolasi. |
+| `cat /proc/...` | Membaca informasi kernel, termasuk pemetaan cgroup atau UID. |
+| `systemd-cgls` | Menampilkan hierarki control group systemd. |
+| `ctr` | CLI tingkat rendah untuk containerd; gunakan hanya jika memahami namespace dan objek yang dikelola. |
+| `runc` | Menjalankan dan memeriksa container sesuai OCI pada level runtime rendah. |
+| `docker version` | Menampilkan versi client dan server Docker. |
+| `docker info` | Menampilkan konfigurasi daemon, storage driver, runtime, dan peringatan. |
+| `docker run` | Membuat dan menjalankan container baru dari image. |
+| `docker ps` | Menampilkan container yang sedang berjalan; `-a` juga menampilkan container yang berhenti. |
+| `docker stop` / `start` | Menghentikan atau menjalankan kembali container yang sudah ada. |
+| `docker rm` | Menghapus container. Opsi `-f` juga menghentikan container terlebih dahulu. |

@@ -141,7 +141,7 @@ dist/
 $ cat .dockerignore
 ```
 
-Tanpa ini, `node_modules` lokal + `.git` ikut terkirim (lambat + bocor).
+Tanpa file ini, `node_modules` lokal dan direktori `.git` ikut dikirim sehingga build menjadi lambat dan berisiko membocorkan informasi.
 
 ## 11. Multi-stage Build
 
@@ -185,15 +185,22 @@ $ docker history myapp:1.0 | head -n 20
 $ docker images --format "{{.Repository}}:{{.Tag}} {{.Size}}"
 ```
 
-## Latihan
+## Fungsi Perintah dan Instruksi
 
-1. Containerize 1 app kecil (Node/Python/Go), build, run, curl.
-2. Tambah `.dockerignore`, bandingkan waktu + ukuran sebelum/sesudah.
-3. Ubah ke multi-stage, catat selisih MB.
-4. Ganti `latest` ke tag versi eksplisit, jelaskan kenapa.
-
-## Rangkuman
-
-- Layer + cache + konteks kecil = build cepat.
-- Tag eksplisit, dependency terkunci, env untuk config.
-- Multi-stage = cara termudah bikin image production ramping.
+| Perintah atau instruksi | Fungsi |
+| --- | --- |
+| `docker pull` | Mengunduh image dari registry ke host. |
+| `docker images` / `docker image ls` | Menampilkan image lokal beserta tag dan ukurannya. |
+| `docker history` | Menampilkan layer dan instruksi yang membentuk image. |
+| `docker build` | Membuat image dari Dockerfile dan build context. `-t` memberi nama/tag, sedangkan `--no-cache` mematikan cache. |
+| `docker tag` | Membuat alias repository dan tag untuk image yang sama. |
+| `docker run` | Membuat container dari image. `-p` memetakan port dan `-e` menetapkan konfigurasi runtime. |
+| `docker inspect` | Menampilkan metadata image atau container dalam format JSON. |
+| `du` | Mengukur ukuran direktori build context atau dependency. |
+| `grep` | Memilih output yang sesuai dengan pola tertentu. |
+| `COPY` | Menyalin file dari build context ke image. |
+| `RUN` | Menjalankan perintah ketika image sedang dibangun. |
+| `WORKDIR` | Menetapkan direktori kerja untuk instruksi berikutnya dan proses runtime. |
+| `ENV` / `ARG` | Menetapkan nilai runtime pada image atau nilai yang hanya tersedia saat build. |
+| `EXPOSE` | Mendokumentasikan port aplikasi; tidak mem-publish port ke host. |
+| `CMD` / `ENTRYPOINT` | Menetapkan proses default saat container dijalankan. |

@@ -1,6 +1,6 @@
 # 02. Storage Administration
 
-> Disk penuh tengah malam adalah mimpi buruk admin. Bab ini bikin kamu pede baca `lsblk`, mount, fstab, LVM, dan swap.
+> Disk penuh pada tengah malam merupakan salah satu insiden paling merepotkan bagi administrator. Bab ini menjelaskan `lsblk`, mount, fstab, LVM, dan swap.
 
 ## Tujuan Pembelajaran
 
@@ -141,16 +141,21 @@ Gejala → aksi:
 - `read-only filesystem` → cek `dmesg` (error disk), remount `mount -o remount,rw /`.
 - Gagal boot karena fstab → pakai `nofail`, boot ke recovery, `mount -a` test.
 
-## Latihan
+## Fungsi Perintah
 
-1. Petakan VPS kamu: `lsblk -f`, `df -hT`, `blkid`. Catat mana root, EFI, data.
-2. Buat file dummy 500 MB, cari dengan `du`, hapus, verifikasi.
-3. Tambah swapfile 1 GB di VM latihan, aktifkan, matikan lagi.
-4. Rusak-sengaja fstab di VM latihan (tambah entry salah tanpa `nofail`), reboot, perbaiki via recovery.
-
-## Rangkuman
-
-- `lsblk + blkid + df` = tiga serangkai diagnosa.
-- Selalu UUID + `nofail` di fstab.
-- LVM memudahkan resize, swap menolong RAM kecil.
-- Disk penuh ≠ selalu `df -h`; cek inode dan deleted-handle juga.
+| Perintah | Fungsi |
+| --- | --- |
+| `lsblk` | Menampilkan struktur block device, partisi, filesystem, dan mount point. |
+| `blkid` | Menampilkan UUID dan tipe filesystem pada device. |
+| `fdisk` | Memeriksa atau mengelola tabel partisi; operasi penulisan harus dilakukan dengan sangat hati-hati. |
+| `mkfs` | Membuat filesystem baru pada device. Perintah ini menghapus data yang ada pada device tersebut. |
+| `mount` / `umount` | Menghubungkan atau melepas filesystem dari mount point. |
+| `findmnt` | Menampilkan filesystem yang sedang ter-mount dan memvalidasi fstab. |
+| `df` | Menampilkan kapasitas filesystem yang terpakai dan tersedia. `-i` menampilkan penggunaan inode. |
+| `du` | Menghitung penggunaan ruang oleh file atau direktori. |
+| `lsof` | Menampilkan file yang sedang dibuka oleh proses; berguna untuk menemukan file yang sudah dihapus tetapi masih memakan ruang. |
+| `pvs` / `vgs` / `lvs` | Menampilkan physical volume, volume group, dan logical volume LVM. |
+| `lvextend` | Memperbesar logical volume. Opsi `-r` juga menyesuaikan filesystem jika didukung. |
+| `free` | Menampilkan penggunaan RAM dan swap. |
+| `swapon` / `mkswap` | Membuat, mengaktifkan, atau menampilkan area swap. |
+| `dmesg` | Membaca pesan kernel, termasuk error disk dan filesystem. |

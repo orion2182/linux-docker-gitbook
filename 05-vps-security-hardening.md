@@ -154,7 +154,7 @@ Pasang alert kalau login dari IP asing (dibahas monitoring Bab 25).
 
 ## 11. Security Baseline
 
-Checklist tiap VPS baru:
+Checklist untuk setiap VPS baru:
 
 1. User non-root + SSH key + `PermitRootLogin no` + `PasswordAuthentication no`
 2. UFW deny incoming, allow hanya 22/80/443
@@ -164,17 +164,21 @@ Checklist tiap VPS baru:
 6. `last`, `auth.log`, dan backup config `/etc/ssh/sshd_config`, `/etc/ufw/*`
 7. Snapshot awal sebelum install Docker/app
 
-Simpan baseline sebagai skrip / repo Git (Bab 09) biar repeatable.
+Simpan baseline sebagai skrip atau repository Git (Bab 09) agar dapat diterapkan secara konsisten.
 
-## Latihan
+## Fungsi Perintah
 
-1. Buat user `deploy`, SSH key only, buktikan password ditolak.
-2. Aktifkan UFW, scan dari luar dengan `nmap` (lab sendiri).
-3. Trigger fail2ban dengan 6x salah password dari IP lab, lihat ban, unban.
-4. Tulis 1 halaman baseline versi kamu, simpan di Git.
-
-## Rangkuman
-
-- SSH key + no root + firewall = 80% keamanan VPS.
-- Fail2ban, AppArmor, auto-update = lapisan berikutnya.
-- Semua perubahan dicatat dan bisa rollback.
+| Perintah | Fungsi |
+| --- | --- |
+| `ssh-keygen` | Membuat pasangan kunci SSH publik dan privat. |
+| `ssh-copy-id` | Menyalin kunci publik ke `authorized_keys` pada server. |
+| `sshd -t` / `sshd -T` | Memvalidasi atau menampilkan konfigurasi SSH yang efektif. |
+| `systemctl reload` | Memuat ulang konfigurasi service tanpa menghentikan proses utama jika service mendukungnya. |
+| `visudo` | Mengedit dan memvalidasi file sudoers dengan aman. |
+| `usermod -aG` | Menambahkan user ke grup tanpa menghapus keanggotaan grup lainnya. |
+| `ufw` | Mengelola firewall host dengan sintaks yang lebih sederhana. |
+| `iptables` / `nft` | Memeriksa aturan firewall tingkat rendah yang digunakan sistem atau Docker. |
+| `fail2ban-client` | Melihat status jail, melakukan ban, atau membuka ban alamat IP. |
+| `aa-status` / `aa-enforce` | Memeriksa status AppArmor dan mengaktifkan mode enforcement pada profil. |
+| `last` / `lastb` | Menampilkan login berhasil dan login gagal yang tercatat. |
+| `journalctl` | Membaca log service dan aktivitas autentikasi dari journald. |

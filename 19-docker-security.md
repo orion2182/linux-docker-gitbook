@@ -1,6 +1,6 @@
 # 19. Docker Security
 
-> Container bukan sandbox ajaib. Bab ini bikin default Docker yang longgar jadi ketat tanpa bikin app mati.
+> Container bukan sandbox yang sempurna. Bab ini menjelaskan cara memperketat default Docker tanpa mengganggu fungsi aplikasi.
 
 ## Tujuan Pembelajaran
 
@@ -8,7 +8,7 @@
 
 ## 1. Container Isolation
 
-Isolasi = namespace + cgroup + (opsional) seccomp/AppArmor. Bukan VM. Kernel shared = kernel bocor = semua container kena.
+Isolasi container menggunakan namespace dan cgroup, serta dapat diperkuat dengan seccomp atau AppArmor. Container bukan VM; semua container berbagi kernel host sehingga kerentanan kernel dapat berdampak luas.
 
 ```bash
 $ docker info | grep -i "security\|apparmor\|seccomp"
@@ -94,7 +94,7 @@ services:
 $ docker exec web touch /evil || echo "benar: ditolak"
 ```
 
-Test dari awal — banyak app kaget karena mau tulis log ke `/app`.
+Uji perubahan ini sejak awal karena banyak aplikasi masih perlu menulis file sementara atau cache ke `/app`.
 
 ## 7. no-new-privileges
 
@@ -133,7 +133,7 @@ $ docker stats --no-stream
 $ dmesg -T | grep -i oom | tail
 ```
 
-Set limit = pagu realistis + alert 80% (Bab 25), bukan asal kecil bikin OOM sendiri.
+Tetapkan limit berdasarkan kebutuhan realistis dan pasang alert pada 80% (Bab 25), bukan menetapkan nilai terlalu kecil hingga memicu OOM.
 
 ## 9. Secrets
 
@@ -180,26 +180,31 @@ Kalau butuh (CI, Portainer): isolasi di host khusus, user terbatas, image terper
 
 ## 12. Container Escape Concepts
 
-Jalur kabur klasik: privileged + mount `/` host, socket write, kernel exploit, breakout via `runc` basi / misconfig volume.
+Jalur container escape yang umum melibatkan container privileged, mount root host, akses tulis ke Docker socket, eksploitasi kernel, runtime `runc` yang usang, atau konfigurasi volume yang keliru.
 
 ```bash
-# CONTOH BERBAHAYA - JANGAN di prod, pahami polanya saja:
-# docker run -v /:/host -it alpine chroot /host sh  # mount root host = game over
+# Contoh berbahaya. Jangan menjalankan perintah ini pada host production:
+# docker run -v /:/host -it alpine chroot /host sh  # memberi akses ke root filesystem host
 $ docker version; docker info | grep -i version
 $ sudo apt list --upgradable | grep -i docker
 ```
 
-Mitigasi: update Engine rutin, non-root + ro + drop caps + no-new-priv + AppArmor/seccomp default + audit image (Bab 23/25).
+Mitigasi: perbarui Engine secara rutin, gunakan non-root, filesystem read-only, drop capabilities, `no-new-privileges`, AppArmor atau seccomp default, dan audit image (Bab 23/25).
 
-## Latihan
+## Fungsi Opsi Keamanan dan Perintah
 
-1. Ubah 1 service jadi non-root + ro + no-new-priv + cap-drop ALL. Catat apa yang rusak, perbaiki minimal.
-2. `inspect` semua container prod, pastikan `Privileged:false` dan tidak mount sock sembarang.
-3. Grep repo kamu: ada secret di ENV/Git/history? Rotasi + pindah ke file.
-4. Set limit mem/CPU, load test, lihat `stats` + OOM atau throttling.
-
-## Rangkuman
-
-- Default longgar, prod harus ketat: non-root, ro, drop caps, no-new-priv, limit, secret file.
-- Privileged + socket = dua dosa besar. Hindari atau isolasi keras.
-- Security tanpa ganggu fungsi = uji tiap pengerasan satu per satu.
+| Opsi atau perintah | Fungsi |
+| --- | --- |
+| `--user` / `USER` | Menjalankan proses dengan UID dan GID tertentu, bukan sebagai root. |
+| `--cap-drop` / `--cap-add` | Menghapus atau menambahkan Linux capability tertentu. Mulai dari `ALL`, lalu tambahkan hanya yang diperlukan. |
+| `--security-opt seccomp=...` | Memilih profil syscall seccomp. `unconfined` menonaktifkan filter dan tidak disarankan di production. |
+| `--security-opt apparmor=...` | Memilih profil AppArmor untuk container. |
+| `--read-only` / `read_only` | Menjadikan root filesystem container hanya-baca. |
+| `--tmpfs` | Menyediakan area tulis sementara di RAM dengan opsi seperti `noexec` dan `nosuid`. |
+| `no-new-privileges` | Mencegah proses memperoleh privilege tambahan melalui setuid atau mekanisme serupa. |
+| `--memory` / `--cpus` / `pids_limit` | Membatasi RAM, CPU, dan jumlah proses container. |
+| `--privileged` | Memberikan akses perangkat dan capability yang sangat luas; hindari untuk aplikasi biasa. |
+| `docker inspect` | Memeriksa privilege, capability, security option, dan mount container. |
+| `docker info` / `docker version` | Memeriksa runtime, konfigurasi keamanan, dan versi Engine. |
+| `dmesg` | Membaca penolakan AppArmor, pesan kernel, dan indikasi OOM. |
+| `grep` | Mencari mount socket, capability, atau pesan keamanan dalam output. |

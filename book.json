@@ -7,5 +7,5 @@
     "readme": "README.md",
     "summary": "SUMMARY.md"
   },
-  "plugins": ["-lunr", "-search", "search-pro", "copy-code-button", "codeblock-filename"]
+  "plugins": []
 }

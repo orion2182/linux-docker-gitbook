@@ -1,6 +1,6 @@
 # 03. Linux Networking
 
-> Kalau networking buta, semua terasa mistis. Bab ini fondasi TCP/IP sampai tools diagnosa harian.
+> Tanpa pemahaman networking, gangguan jaringan sulit dianalisis. Bab ini membahas fondasi TCP/IP dan tools diagnosis harian.
 
 ## Tujuan Pembelajaran
 
@@ -49,7 +49,7 @@ $ python3 -c "import ipaddress; print(list(ipaddress.ip_network('10.0.0.0/29')))
 
 ## 5. Gateway
 
-Pintu keluar ke network lain. Default gateway wajib benar, kalau tidak internet mati total.
+Gateway merupakan pintu keluar menuju network lain. Default gateway harus benar; jika tidak, koneksi internet tidak akan berfungsi.
 
 ```bash
 $ ip route show default
@@ -81,7 +81,7 @@ $ dig github.com +short
 $ nslookup github.com
 ```
 
-DNS mati = `ping 8.8.8.8` jalan tapi `ping google.com` gagal.
+Jika DNS bermasalah, `ping 8.8.8.8` dapat berhasil, tetapi `ping google.com` gagal.
 
 ## 8. Ports
 
@@ -168,7 +168,7 @@ $ wget -r -np -nH --cut-dirs=2 https://example.com/docs/
 
 ## 16. Network Troubleshooting
 
-Urutan baku (jangan acak):
+Gunakan urutan pemeriksaan berikut agar lapisan masalah tidak tertukar:
 
 ```bash
 $ ip addr; ip route show default
@@ -186,15 +186,21 @@ Pola cepat:
 - Ping IP ok, nama gagal → DNS.
 - curl localhost ok, dari luar gagal → firewall / listen `127.0.0.1` bukan `0.0.0.0`.
 
-## Latihan
+## Fungsi Perintah
 
-1. Gambar topologi VPS kamu: IP, CIDR, gateway, DNS.
-2. `ss -tulpn` lalu tebak tiap port milik siapa.
-3. Rusakkan DNS sengaja di lab (`resolv.conf` salah), rasakan bedanya, kembalikan.
-4. `curl -w` ke 3 situs, bandingkan `time_total`.
-
-## Rangkuman
-
-- Hafalkan urutan: IP → route → DNS → port → aplikasi.
-- `ip` dan `ss` untuk fakta, `ping/traceroute` untuk path, `curl` untuk aplikasi.
-- 80% masalah jaringan = salah baca layer.
+| Perintah | Fungsi |
+| --- | --- |
+| `ip addr` / `ip link` | Menampilkan alamat IP dan status interface jaringan. |
+| `ip route` | Menampilkan atau mengelola tabel routing. `ip route get` menunjukkan jalur yang dipilih untuk tujuan tertentu. |
+| `ip neigh` | Menampilkan tabel neighbor, yaitu pemetaan IP dan alamat MAC pada jaringan lokal. |
+| `ss` | Menampilkan socket dan port. `-t` TCP, `-u` UDP, `-l` listening, `-p` proses, dan `-n` alamat numerik. |
+| `ping` | Menguji keterjangkauan host dan mengukur latency menggunakan ICMP. |
+| `traceroute` / `mtr` | Menampilkan hop jaringan menuju tujuan; `mtr` menggabungkan traceroute dan monitoring berkala. |
+| `dig` / `nslookup` | Menguji resolusi DNS dan melihat jawaban DNS secara langsung. |
+| `getent hosts` | Menguji resolusi nama menggunakan resolver sistem, termasuk `/etc/hosts`. |
+| `resolvectl` | Memeriksa status dan melakukan query melalui `systemd-resolved`. |
+| `curl` | Mengirim request HTTP atau HTTPS dan memeriksa header, status, isi, serta waktu respons. |
+| `wget` | Mengunduh file atau melakukan mirror HTTP. |
+| `iptables` / `ufw` | Memeriksa atau mengelola aturan firewall; UFW merupakan frontend yang lebih sederhana. |
+| `cat` | Membaca file konfigurasi, misalnya `/etc/resolv.conf`. |
+| `grep` | Menyaring output berdasarkan pola, misalnya port atau alamat tertentu. |

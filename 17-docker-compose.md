@@ -75,6 +75,27 @@ volumes:
   pgdata: {}
 ```
 
+## Fungsi Perintah dan Field Compose
+
+| Perintah atau field | Fungsi |
+| --- | --- |
+| `docker compose config` | Memvalidasi file Compose dan menampilkan konfigurasi final setelah substitusi variable. |
+| `docker compose pull` | Mengunduh image yang didefinisikan oleh service. |
+| `docker compose build` | Membangun image dari bagian `build`; `--no-cache` mengabaikan cache. |
+| `docker compose up` | Membuat dan menjalankan seluruh service. `-d` menjalankan di background, `--build` membangun ulang image terlebih dahulu. |
+| `docker compose ps` | Menampilkan status service dalam project Compose. |
+| `docker compose logs` | Membaca log satu atau beberapa service; `-f` mengikuti log secara realtime. |
+| `docker compose exec` | Menjalankan perintah pada container service yang sedang berjalan. |
+| `docker compose stop` / `start` | Menghentikan atau menjalankan service tanpa menghapus container. |
+| `docker compose down` | Menghapus container dan network project. Opsi `-v` juga menghapus volume, sehingga berisiko menghapus data. |
+| `services` | Mendefinisikan container aplikasi. |
+| `networks` / `volumes` | Mendefinisikan jaringan dan penyimpanan yang dikelola Compose. |
+| `environment` / `env_file` | Mengirim environment variable ke service. |
+| `healthcheck` | Menentukan pemeriksaan kesiapan service. |
+| `depends_on` | Mengatur urutan dan kondisi dependensi saat service dijalankan. |
+| `restart` | Menentukan kebijakan restart service. |
+| `profiles` | Menandai service opsional yang hanya dijalankan saat profile diaktifkan. |
+
 Named untuk data, bind `:ro` untuk config. Cek dengan `docker compose config` + `inspect`.
 
 ## 5. Environment Variables
@@ -189,8 +210,8 @@ services:
 
 - `no` = job/manual.
 - `unless-stopped` = server/app standar (survive reboot, hormati stop manual).
-- `always` = kiosk/edge yang harus nyala walau sempat di-stop.
-- `on-failure` = worker yang boleh mati sukses.
+- `always` = service yang harus selalu berjalan, termasuk setelah dihentikan secara manual lalu daemon dimulai ulang.
+- `on-failure` = worker yang hanya dijalankan ulang ketika proses berakhir dengan error.
 
 ## 11. Profiles
 
@@ -249,7 +270,7 @@ $ docker compose down
 $ docker compose down -v   # HATI-HATI: hapus volume!
 ```
 
-- `stop` = mati bisa nyala lagi. `down` = hapus container+network (volume aman kecuali `-v`).
+- `stop` = menghentikan service sehingga dapat dijalankan kembali. `down` = menghapus container dan network; volume tetap ada kecuali opsi `-v` digunakan.
 - Update: `pull`/`build` → `up -d` lagi. Rollback: ganti tag → `up -d`.
 
 Contoh lengkap:
@@ -287,16 +308,3 @@ networks:
 volumes:
   pgdata: {}
 ```
-
-## Latihan
-
-1. Tulis compose 3 service di atas dari nol, `config`, `up`, `ps`, `logs`.
-2. Matikan 1 service, buktikan `depends_on` + healthcheck menahan start.
-3. Tambah profile `tools` berisi adminer, up dengan dan tanpa profile.
-4. Simulasikan update tag + rollback via `up -d`.
-
-## Rangkuman
-
-- `config → pull/build → up -d → ps/logs` = siklus Compose.
-- Network/volume/env/secrets/healthcheck/depends_on/restart = fondasi prod (Bab 18/21).
-- `down -v` adalah perintah paling berbahaya di bab ini. Pahami sebelum tekan enter.

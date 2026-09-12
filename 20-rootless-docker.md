@@ -1,6 +1,6 @@
 # 20. Rootless Docker
 
-> Docker tanpa daemon root = bocor container tidak langsung root host. Harga: setup user-namespace + limitasi network/port.
+> Pada rootless Docker, daemon berjalan tanpa hak root sehingga container yang bocor tidak langsung memperoleh hak root host. Konsekuensinya adalah setup user namespace serta beberapa batasan network dan port.
 
 ## Tujuan Pembelajaran
 
@@ -27,7 +27,7 @@ $ cat /proc/self/uid_map
 $ cat /proc/self/gid_map
 ```
 
-Ini yang bikin escape tidak langsung dapat root host.
+Pemetaan ini membuat proses dari container tidak langsung memperoleh hak root pada host.
 
 ## 3. subuid / subgid
 
@@ -65,7 +65,7 @@ $ docker version
 
 ## 5. systemd User Services
 
-Agar daemon nyala otomatis + survive logout (lingering).
+Agar daemon menyala otomatis dan tetap berjalan setelah sesi login berakhir (lingering).
 
 ```bash
 $ loginctl enable-linger $USER
@@ -76,7 +76,7 @@ $ echo $XDG_RUNTIME_DIR
 $ ls -l $XDG_RUNTIME_DIR/docker.sock
 ```
 
-Tanpa lingering, Docker mati saat SSH logout. Ini jebakan paling sering.
+Tanpa lingering, Docker dapat berhenti saat sesi SSH berakhir. Ini merupakan kesalahan konfigurasi yang umum.
 
 ## 6. Networking
 
@@ -102,7 +102,7 @@ $ docker volume create testvol
 $ docker run --rm -v testvol:/data alpine sh -c "echo hi > /data/f && cat /data/f"
 ```
 
-Backup: backup home + volume (path beda dari rootful!). Jangan samakan skrip backup rootful mentah-mentah.
+Backup direktori home dan volume karena path rootless berbeda dari instalasi rootful. Jangan menggunakan skrip backup rootful tanpa menyesuaikannya.
 
 ## 8. Troubleshooting
 
@@ -118,21 +118,25 @@ $ sysctl net.ipv4.ip_unprivileged_port_start
 ```
 
 Kasus umum:
-- `cannot connect to daemon` → `DOCKER_HOST` salah / service user mati / logout tanpa linger.
+- `cannot connect to daemon` → `DOCKER_HOST` salah, service user berhenti, atau lingering belum aktif.
 - `no subuid` → tambah subuid/subgid lalu reinstall user setup.
 - Port 80 gagal bind → pakai 8080 + Nginx di depan, atau turunkan `ip_unprivileged_port_start`.
-- `ping` gagal tapi `wget` jalan → limitasi slirp, bukan internet mati.
+- `ping` gagal tetapi `wget` berhasil → kemungkinan merupakan keterbatasan slirp, bukan koneksi internet yang terputus.
 - Migrasi rootful → rootless: image harus pull/build ulang, volume pindah manual via backup/restore (Bab 15).
 
-## Latihan
+## Fungsi Perintah
 
-1. Install rootless di VM lab (user baru), enable linger, reboot, buktikan tetap jalan.
-2. Jalankan nginx di 8080, curl dari host. Coba port 80, catat error.
-3. Bandingkan `docker info` rootful vs rootless (root dir, driver).
-4. Migrasi 1 volume kecil rootful → rootless via tar backup/restore.
-
-## Rangkuman
-
-- Rootless = kurangi blast radius dengan harga network/storage beda.
-- Kunci: subuid, linger, DOCKER_HOST, port tinggi + proxy.
-- Pilih rootless untuk multi-user/ketat, rootful untuk performa/simplicity single-tenant + hardening Bab 19.
+| Perintah | Fungsi |
+| --- | --- |
+| `dockerd-rootless-setuptool.sh` | Menyiapkan konfigurasi Docker rootless untuk user saat ini. |
+| `systemctl --user` | Mengelola service Docker yang berjalan sebagai user biasa. |
+| `loginctl enable-linger` | Membuat service user tetap berjalan setelah sesi login berakhir. |
+| `journalctl --user` | Membaca log service user, termasuk daemon rootless. |
+| `rootlesskit` | Menyediakan helper namespace, process, dan network untuk daemon rootless. |
+| `docker info` | Memeriksa root directory, storage driver, dan mode daemon. |
+| `docker run --network` | Menguji akses jaringan dari container rootless. |
+| `docker volume` | Membuat dan memeriksa volume yang disimpan pada root directory user. |
+| `subuid` / `subgid` | Menentukan rentang UID/GID host yang dapat dipetakan ke user namespace. |
+| `loginctl show-user` | Memeriksa apakah lingering user aktif. |
+| `sysctl` | Membaca atau mengubah parameter kernel, termasuk batas port yang dapat dibuka user biasa. |
+| `echo` / `ls` / `cat` | Memeriksa environment variable, socket, dan file mapping. |

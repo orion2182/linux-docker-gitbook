@@ -151,7 +151,7 @@ Jangan `ports: ["5432:5432"]` untuk DB di VPS publik. Kalau butuh admin, pakai S
 
 ## 8. Service Dependencies
 
-Graf sehat: proxy → web/api → db/redis → (worker baca queue).
+Alur dependensi yang sehat adalah proxy → web/API → database atau Redis → worker yang membaca queue.
 
 ```yaml
 services:
@@ -204,15 +204,21 @@ $ docker compose ps
 $ docker compose logs -f web worker
 ```
 
-## Latihan
+## Fungsi Perintah dan Field
 
-1. Deploy stack mini: web + db + redis dalam 2 network. Buktikan isolasi via `ping`.
-2. Kill DB, lihat api/worker retry. Nyalakan lagi, pastikan pulih tanpa recreate.
-3. Tambah worker, kirim 100 job dummy, pastikan habis tanpa duplikat ganda.
-4. Tutup semua `ports` kecuali proxy. Akses DB hanya via `exec`, bukan dari laptop.
-
-## Rangkuman
-
-- Stateless di depan, stateful di belakang, 1 network per zona.
-- Hanya proxy yang publik. DB/queue tidak pernah publik.
-- Healthcheck + retry + idempotent worker = multi-container yang tenang.
+| Perintah atau field | Fungsi |
+| --- | --- |
+| `docker compose config` | Memvalidasi dan merender konfigurasi multi-container sebelum dijalankan. |
+| `docker compose up` | Membuat dan menjalankan seluruh service beserta network dan volume yang diperlukan. |
+| `docker compose ps` | Memeriksa status, port, dan kondisi health service. |
+| `docker compose logs` | Membaca log dari satu atau beberapa service. |
+| `docker compose exec` | Menjalankan perintah di dalam service yang aktif, misalnya `redis-cli` atau `psql`. |
+| `image` | Menentukan image yang digunakan service. |
+| `build` | Menentukan konteks dan Dockerfile untuk membangun image service. |
+| `command` | Mengganti perintah default image, misalnya menjalankan worker. |
+| `ports` | Mem-publish port service ke host atau publik. Hindari pada database dan queue internal. |
+| `expose` | Mendokumentasikan port yang tersedia untuk komunikasi internal tanpa mem-publish ke host. |
+| `networks` | Menentukan zona komunikasi service, misalnya `frontend` dan `backend`. |
+| `volumes` | Menyimpan data stateful di luar writable layer container. |
+| `depends_on` | Menentukan service yang harus tersedia sebelum service lain dijalankan. |
+| `healthcheck` | Menguji kesiapan aplikasi, bukan hanya keberadaan prosesnya. |

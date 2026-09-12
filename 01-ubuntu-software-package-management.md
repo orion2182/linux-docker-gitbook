@@ -8,7 +8,7 @@ Setelah bab ini kamu bisa:
 - Menjelaskan alur APT → repository → GPG → dpkg
 - Update, upgrade, install, remove, purge dengan aman
 - Cari info paket, kelola repository, PPA, dan pinning
-- Mendiganosa dependency problem tanpa `rm -rf` ngawur
+- Mendiagnosis masalah dependensi tanpa menggunakan perintah destruktif secara sembarangan
 
 ## 1. APT Architecture
 
@@ -137,7 +137,7 @@ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o 
 
 ## 13. PPAs
 
-Personal Package Archive dari Launchpad. Praktis tapi risiko: tidak resmi, bisa basi.
+Personal Package Archive dari Launchpad. Praktis, tetapi tidak resmi dan dapat tidak terawat.
 
 ```bash
 $ sudo add-apt-repository ppa:deadsnakes/ppa
@@ -190,16 +190,22 @@ $ apt list --upgradable
 
 Di production: jadwalkan maintenance window, snapshot dulu, baru upgrade. Otomatisasi penuh dibahas di Bab 08 (unattended-upgrades di Bab 05).
 
-## Latihan
+## Fungsi Perintah
 
-1. Cari paket `htop`, lihat info, install, purge, install lagi.
-2. Tambah 1 repo, `update`, lalu hapus lagi. Perhatikan error GPG kalau key belum dipasang.
-3. Hold 1 paket, coba `upgrade`, lalu unhold.
-4. Simulasikan `dpkg --configure -a` setelah install `.deb` gagal.
-
-## Rangkuman
-
-- `update` = refresh indeks, `upgrade` = naikkan versi.
-- `remove` sisakan config, `purge` bersihkan total.
-- `apt` untuk harian, `dpkg` + `apt-cache` untuk debug.
-- Repo + GPG + pinning = kunci stabilitas production.
+| Perintah | Fungsi |
+| --- | --- |
+| `apt` | Frontend tingkat tinggi untuk mencari, memasang, memperbarui, dan menghapus paket. |
+| `apt update` | Mengunduh ulang indeks paket dari repository; tidak memperbarui paket yang sudah terpasang. |
+| `apt upgrade` | Memperbarui paket tanpa menghapus paket lain. |
+| `apt install` | Memasang paket beserta dependensi yang diperlukan. |
+| `apt remove` / `apt purge` | Menghapus paket; `purge` juga menghapus file konfigurasinya. |
+| `apt search` / `apt show` | Mencari paket dan menampilkan metadata paket. |
+| `apt-cache` | Membaca indeks paket untuk melihat policy dan dependensi. |
+| `dpkg` | Mengelola paket `.deb` secara langsung pada level rendah. |
+| `add-apt-repository` | Menambahkan atau menghapus repository atau PPA. |
+| `apt-mark hold` | Menahan paket agar tidak diperbarui otomatis. |
+| `apt autoremove` / `autoclean` | Menghapus dependensi yang tidak dipakai dan cache paket lama. |
+| `cat` | Menampilkan isi file konfigurasi, misalnya `sources.list`. |
+| `ls` | Menampilkan isi direktori, misalnya daftar keyring atau file repository. |
+| `grep` | Menyaring baris output yang sesuai dengan pola tertentu. |
+| `sudo` | Menjalankan operasi administrasi dengan hak root. |

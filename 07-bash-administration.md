@@ -126,7 +126,7 @@ log() { echo "[$(date '+%F %T')] $*"; }
 trap 'echo "gagal di baris $LINENO"' ERR
 ```
 
-- `-e` berhenti saat error, `-u` tolak var unset, `-o pipefail` gagalkan pipe yang bocor.
+- `-e` menghentikan skrip saat terjadi error, `-u` menolak variabel yang belum didefinisikan, dan `-o pipefail` meneruskan kegagalan dari pipeline.
 - `trap` untuk cleanup: hapus tmp, turunkan lock.
 
 ## 10. ShellCheck
@@ -158,17 +158,24 @@ fi
 echo "OK disk / ${USE}%"
 ```
 
-Simpan di `~/bin/`, `chmod +x`, versioning dengan Git (Bab 09), jadwalkan via cron/systemd (Bab 08).
+Simpan di `~/bin/`, berikan permission eksekusi dengan `chmod +x`, versioning menggunakan Git (Bab 09), lalu jadwalkan melalui cron atau systemd (Bab 08).
 
-## Latihan
+## Fungsi Perintah dan Sintaks
 
-1. Tulis `sysinfo.sh`: hostname, uptime, disk, mem, 5 proses top.
-2. Tulis `backup-etc.sh` dengan `set -euo pipefail` + `trap`, lolos ShellCheck tanpa warning.
-3. Refactor 1 one-liner panjang kamu jadi fungsi + parameter.
-4. Sengaja bikin var unset, buktikan `-u` menangkap sebelum merusak.
-
-## Rangkuman
-
-- Quote variabel, cek exit code, gagal cepat dengan `set -euo pipefail`.
-- Fungsi kecil + parameter jelas > skrip 300 baris tanpa struktur.
-- ShellCheck bukan opsional di production.
+| Perintah atau sintaks | Fungsi |
+| --- | --- |
+| `bash` | Menjalankan skrip atau shell Bash. Shebang `#!/usr/bin/env bash` memilih Bash dari `PATH`. |
+| `echo` | Menampilkan teks, nilai variabel, atau pesan log. |
+| `date` | Menghasilkan tanggal dan waktu, termasuk format ISO dengan `-Is`. |
+| `$(...)` | Command substitution; mengganti ekspresi dengan output perintah di dalamnya. |
+| `$?` | Menyimpan exit code perintah terakhir. Nilai `0` berarti berhasil. |
+| `if` / `case` | Mengevaluasi kondisi dan memilih blok perintah yang sesuai. |
+| `for` / `while` | Mengulang perintah untuk daftar item atau selama kondisi terpenuhi. |
+| `local` | Membatasi variabel agar hanya berlaku di dalam fungsi. |
+| `trap` | Menjalankan tindakan ketika event tertentu terjadi, misalnya error atau exit. |
+| `set -euo pipefail` | Mengaktifkan berhenti saat error, menolak variabel yang belum didefinisikan, dan meneruskan error dari pipeline. |
+| `chmod +x` | Menambahkan permission eksekusi pada skrip. |
+| `df` / `du` | Membaca kapasitas filesystem dan ukuran direktori atau file. |
+| `awk` | Memproses teks berbentuk kolom atau record. |
+| `sort` / `head` | Mengurutkan output dan mengambil sejumlah baris awal. |
+| `shellcheck` | Menganalisis skrip Bash untuk menemukan bug dan pola yang tidak aman. |

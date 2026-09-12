@@ -1,6 +1,6 @@
 # 25. Monitoring Docker & VPS
 
-> Yang tidak dimonitor pasti mati diam-diam. Bab ini dari `docker stats` sampai Prometheus + Grafana + alerting.
+> Service yang tidak dimonitor dapat berhenti tanpa diketahui. Bab ini membahas observabilitas mulai dari `docker stats` hingga Prometheus, Grafana, dan alerting.
 
 ## Tujuan Pembelajaran
 
@@ -173,15 +173,21 @@ $ docker compose logs prometheus --tail 30
 $ curl -s http://127.0.0.1:9090/api/v1/rules | python3 -m json.tool | head -n 60
 ```
 
-## Latihan
+## Fungsi Perintah dan Komponen
 
-1. Pasang node-exporter + cAdvisor + Prometheus di lab, query `up` + `node_load1`.
-2. Import 1 dashboard Grafana, screenshot tren 1 jam.
-3. Buat 1 alert disk >85%, simulasikan dengan file dummy, pastikan bunyi lalu pulih.
-4. Tulis runbook 1 halaman per alert (gejala → perintah → eskalasi).
-
-## Rangkuman
-
-- `stats/events/logs/health` = sekarang. Prometheus/Grafana = tren. Alert = bangunkan kamu sebelum user komplain.
-- Monitor 4 pilar + health app, retensi + akses aman.
-- Alert tanpa runbook = notifikasi yang di-mute.
+| Perintah atau komponen | Fungsi |
+| --- | --- |
+| `docker stats` | Menampilkan penggunaan resource container secara realtime atau satu kali dengan `--no-stream`. |
+| `docker events` | Menampilkan event lifecycle seperti start, stop, die, dan OOM. |
+| `docker logs` / `docker compose logs` | Membaca log aplikasi atau service untuk korelasi dengan metrik. |
+| `healthcheck` | Menentukan apakah aplikasi siap melayani request. |
+| `node-exporter` | Mengekspos metrik host Linux untuk Prometheus. |
+| `cAdvisor` | Mengekspos metrik penggunaan resource per container. |
+| `Prometheus` | Menyimpan time series, melakukan scrape endpoint metrics, dan mengevaluasi PromQL. |
+| `Grafana` | Menampilkan dashboard dan visualisasi dari Prometheus atau data source lain. |
+| `Alertmanager` | Mengelompokkan, merutekan, dan mengirim alert ke Telegram, email, atau webhook. |
+| `curl` | Menguji endpoint metrics dan API Prometheus. |
+| `python3 -m json.tool` | Memformat respons JSON agar mudah dibaca. |
+| `up` | Metric Prometheus yang menunjukkan apakah target scrape dapat dijangkau. |
+| `node_load1` | Metric load average host untuk interval satu menit. |
+| `docker compose logs --tail` | Mengambil sejumlah baris log terakhir untuk diagnosis cepat. |

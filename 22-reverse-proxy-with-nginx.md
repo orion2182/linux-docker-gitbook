@@ -140,7 +140,7 @@ services:
 
 ## 8. SSL/TLS
 
-TLS = enkripsi + autentikasi server via sertifikat. Versi aman: TLS 1.2+ (1.0/1.1 mati).
+TLS menyediakan enkripsi dan autentikasi server melalui sertifikat. Gunakan TLS 1.2 atau lebih baru; TLS 1.0 dan 1.1 sebaiknya dinonaktifkan.
 
 ```bash
 $ openssl s_client -connect contoh.com:443 -servername contoh.com </dev/null 2>/dev/null | openssl x509 -noout -dates -subject -issuer
@@ -174,8 +174,8 @@ Jangan lupa mount `certs:/etc/nginx/certs:ro` + reload setelah renew (hook `--de
 
 ## 10. Troubleshooting 502/504
 
-- **502 Bad Gateway** = Nginx tidak bisa ngomong ke upstream (app mati / port salah / network beda / crash start).
-- **504 Gateway Timeout** = upstream terlalu lama (query berat / timeout kecil / worker habis).
+- **502 Bad Gateway** = Nginx tidak dapat terhubung ke upstream (aplikasi mati, port salah, network berbeda, atau proses crash saat start).
+- **504 Gateway Timeout** = upstream merespons terlalu lama (query berat, timeout terlalu kecil, atau worker habis).
 
 ```bash
 $ sudo tail -n 50 /var/log/nginx/error.log
@@ -186,17 +186,23 @@ $ ss -tlnp | grep 3000
 $ curl -w "code:%{http_code} time:%{time_total}s\n" -o /dev/null -s https://contoh.com/lambat
 ```
 
-Naikkan `proxy_read_timeout` hanya setelah pastikan bukan query N+1 / deadlock. Timeout besar tanpa fix = antrean makin panjang.
+Naikkan `proxy_read_timeout` hanya setelah memastikan masalahnya bukan query N+1 atau deadlock. Timeout besar tanpa perbaikan akar masalah dapat memperpanjang antrean.
 
-## Latihan
+## Fungsi Perintah dan Directive
 
-1. Proxy-kan 1 container via host Nginx, buktikan header IP asli sampai ke app log.
-2. Pasang LE staging (`--staging`), renew dry-run, simulasi hook reload.
-3. Simulasikan 502 (matikan app) dan 504 (sleep 70s di endpoint), bedakan lognya.
-4. Gambar aliran: client → 443 → Nginx → 127.0.0.1:3000 → container.
-
-## Rangkuman
-
-- 1 pintu Nginx, header lengkap, TLS otomatis, app di belakang privat.
-- 502 = tidak nyambung, 504 = kelamaan. Baca `error.log` + `curl` langsung ke upstream dulu.
-- Test `nginx -t` tiap ubah, reload bukan restart.
+| Perintah atau directive | Fungsi |
+| --- | --- |
+| `nginx -t` | Memvalidasi sintaks konfigurasi sebelum reload atau restart. |
+| `nginx -T` | Menampilkan konfigurasi gabungan yang sedang digunakan Nginx. |
+| `systemctl reload nginx` | Memuat ulang konfigurasi tanpa memutus koneksi aktif jika memungkinkan. |
+| `server` / `server_name` | Mendefinisikan virtual host dan domain yang dilayani. |
+| `listen` | Menentukan alamat dan port tempat Nginx menerima koneksi. |
+| `location` | Menentukan aturan berdasarkan path request. |
+| `proxy_pass` | Meneruskan request ke upstream atau aplikasi backend. |
+| `proxy_set_header` | Mengirim header seperti Host, IP client, dan skema HTTP ke backend. |
+| `curl -I` / `curl -v` | Menguji header atau menampilkan detail koneksi HTTP/TLS. |
+| `dig` | Memeriksa record DNS domain. |
+| `openssl s_client` | Memeriksa sertifikat dan negosiasi TLS secara langsung. |
+| `certbot` | Meminta, memeriksa, dan memperbarui sertifikat Let's Encrypt. |
+| `ss` | Memastikan port upstream sedang listen. |
+| `docker compose logs` | Membaca log aplikasi di belakang Nginx. |

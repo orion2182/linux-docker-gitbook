@@ -119,7 +119,7 @@ EXPOSE 3000
 
 ```bash
 $ docker run -d -p 3000:3000 myapp:1
-$ docker run -d -P myapp:1   # random host port untuk semua EXPOSE
+$ docker run -d -P myapp:1   # port host acak untuk semua port EXPOSE
 $ docker ps
 ```
 
@@ -132,6 +132,26 @@ Perintah default, bisa dioverride argumen `docker run`.
 ```dockerfile
 CMD ["node", "server.js"]
 ```
+
+## Fungsi Instruksi dan Perintah
+
+| Instruksi atau perintah | Fungsi |
+| --- | --- |
+| `FROM` | Memilih image dasar atau stage build. |
+| `WORKDIR` | Menetapkan direktori kerja untuk instruksi dan proses container. |
+| `COPY` | Menyalin file dari build context ke image. Opsi `--chown` mengatur pemilik file. |
+| `ADD` | Menyalin file dan memiliki kemampuan tambahan seperti ekstraksi arsip; gunakan hanya saat diperlukan. |
+| `RUN` | Menjalankan perintah saat proses build dan menyimpan hasilnya pada layer image. |
+| `ENV` | Menetapkan environment variable yang tersedia saat runtime. |
+| `ARG` | Menetapkan variable yang tersedia selama proses build. |
+| `USER` | Menetapkan user atau group untuk instruksi berikutnya dan proses runtime. |
+| `EXPOSE` | Mendokumentasikan port aplikasi; tidak membuka port host secara otomatis. |
+| `CMD` | Menetapkan perintah default yang dapat dioverride saat `docker run`. |
+| `ENTRYPOINT` | Menetapkan executable utama yang tetap digunakan oleh container. |
+| `HEALTHCHECK` | Menetapkan pemeriksaan kesehatan proses atau endpoint aplikasi. |
+| `docker build` | Membuat image dari Dockerfile. `--progress=plain` menampilkan log build rinci, sedangkan `--target` memilih stage tertentu. |
+| `docker history` | Memeriksa layer yang terbentuk dan membantu menemukan layer berukuran besar. |
+| `docker inspect` | Membaca metadata container, termasuk status healthcheck. |
 
 ```bash
 $ docker run --rm myapp:1 node --version
@@ -184,7 +204,7 @@ $ docker build --target build -t myapp:build .   # stop di stage tertentu
 
 Kasus umum:
 - `COPY failed: no such file` → konteks salah / `.dockerignore` terlalu agresif.
-- `apt 404` → base basi, `apt update` dulu dalam RUN yang sama.
+- `apt 404` → indeks pada image dasar sudah usang; jalankan `apt update` pada instruksi RUN yang sama.
 - permission denied → `USER` terlalu awal sebelum `COPY/chown` atau `npm install`.
 - cache menipu → `--no-cache` sekali untuk pastikan.
 
@@ -202,16 +222,3 @@ ENV NODE_ENV=production
 HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://127.0.0.1:3000/health || exit 1
 CMD ["node", "server.js"]
 ```
-
-## Latihan
-
-1. Tulis Dockerfile dari nol untuk 1 app, tiap instruksi 1 komentar kenapa.
-2. Pecah build gagal sengaja (typo COPY), baca log plain, perbaiki.
-3. Tambah USER non-root + HEALTHCHECK, buktikan `whoami` + `inspect Health`.
-4. Bandingkan `CMD` shell vs exec saat `docker stop` (mana yang graceful?).
-
-## Rangkuman
-
-- `COPY` > `ADD`, `RUN` build-time, `CMD/ENTRYPOINT` run-time.
-- Non-root + exec form + healthcheck = standar prod.
-- Debug dengan `--progress=plain` + `history` + target stage.

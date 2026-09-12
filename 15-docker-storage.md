@@ -67,7 +67,7 @@ $ docker volume inspect pgdata
 $ docker volume ls -f dangling=true
 ```
 
-Nama jelas > hash acak. Dokumentasikan di Compose (Bab 17).
+Gunakan nama volume yang jelas, bukan nama acak. Dokumentasikan volume tersebut di Compose (Bab 17).
 
 ## 6. Database Persistence
 
@@ -120,17 +120,21 @@ Kasus umum:
 - `/var/lib/docker` penuh → `docker system prune` hati-hati + batasi log + pindah root dir kalau perlu.
 - DB tidak start → cek log: biasanya permission `/var/lib/postgresql/data` atau password berubah.
 
-Jangan `docker volume prune -f` di prod tanpa daftar volume penting.
+Jangan menjalankan `docker volume prune -f` di production tanpa membuat daftar volume penting.
 
-## Latihan
+## Fungsi Perintah
 
-1. Buktikan writable layer hilang: tulis file, rm, cek hilang.
-2. Persistensi nginx via named volume vs bind `:ro`, bedakan use-case.
-3. Backup + restore 1 volume, verifikasi isi sama (`diff -r`).
-4. Simulasikan permission error (bind file root-only ke container non-root), perbaiki 2 cara.
-
-## Rangkuman
-
-- Writable layer = sementara. Volume = data. Bind = dev/config. tmpfs = sementara di RAM.
-- 1 DB = 1 named volume + restart policy + backup teruji.
-- `inspect Mounts` + `system df` = senjata diagnosa.
+| Perintah | Fungsi |
+| --- | --- |
+| `docker volume create` | Membuat named volume yang dikelola Docker. |
+| `docker volume ls` / `inspect` | Menampilkan dan memeriksa detail volume. |
+| `docker run -v` | Memasang named volume atau bind mount ke dalam container. Tambahkan `:ro` untuk mode baca saja. |
+| `--tmpfs` | Memasang filesystem sementara di RAM yang hilang saat container berhenti. |
+| `docker system df` | Menampilkan penggunaan ruang Docker oleh image, container, volume, dan cache. |
+| `docker volume prune` | Menghapus volume yang tidak digunakan; bersifat destruktif. |
+| `docker inspect` | Memastikan sumber dan tujuan mount yang sebenarnya. |
+| `tar` | Mengarsipkan atau memulihkan isi volume. `-c` membuat arsip, `-x` mengekstrak, dan `-z` menggunakan gzip. |
+| `df` | Menampilkan ruang kosong filesystem host atau mount tertentu. |
+| `ls` | Memeriksa file pada direktori volume atau backup. |
+| `docker logs` | Membaca log container untuk menemukan error permission atau database. |
+| `cron` / `systemd` | Menjadwalkan backup volume secara berkala. |

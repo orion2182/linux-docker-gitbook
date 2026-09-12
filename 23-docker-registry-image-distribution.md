@@ -1,6 +1,6 @@
 # 23. Docker Registry & Image Distribution
 
-> Registry = gudang image. Tanpa strategi tag + digest, deploy = judi `latest`.
+> Registry merupakan gudang image. Tanpa strategi tag dan digest, deployment menjadi tidak dapat diprediksi jika hanya mengandalkan `latest`.
 
 ## Tujuan Pembelajaran
 
@@ -75,7 +75,7 @@ Di prod: `pull` eksplisit sebelum `up -d` agar tahu persis digest yang jalan. Ca
 
 ## 6. Image Tagging Strategy
 
-Skema yang tenang:
+Gunakan skema tagging yang konsisten:
 
 - `1.4.0` immutable per rilis (git tag sama).
 - `1.4`, `1` bergerak untuk patch/minor.
@@ -118,15 +118,19 @@ $ docker scout quickview registry.example.com/team/myapp:1.4.0 2>&1 | head -n 40
 $ curl -u user:pass https://registry.example.com/v2/_catalog
 ```
 
-## Latihan
+## Fungsi Perintah dan Konsep
 
-1. Tag + push 1 image ke registry privat (atau Hub private) dengan 3 tag.
-2. Pull by digest di VM lain, buktikan sama persis.
-3. Scan 1 image dengan Trivy, catat 3 CVE teratas + rencana fix (update base?).
-4. Tulis kebijakan retensi: berapa tag disimpan, kapan prune.
-
-## Rangkuman
-
-- Prod = tag versi + digest, bukan latest.
-- Private registry + TLS/auth/scan/retensi = distribusi yang aman.
-- Push dari CI tepercaya, pull eksplisit di server.
+| Perintah atau konsep | Fungsi |
+| --- | --- |
+| `docker login` / `logout` | Menyimpan atau menghapus kredensial registry pada host atau credential helper. |
+| `docker pull` | Mengunduh image atau manifest dari registry. |
+| `docker push` | Mengunggah layer dan manifest image ke registry. |
+| `docker tag` | Memberikan nama dan versi repository pada image lokal. |
+| `docker images --digests` | Menampilkan digest yang terkait dengan tag image lokal. |
+| `docker inspect` | Membaca `RepoDigests` dan metadata image. |
+| `curl /v2/_catalog` | Menguji API registry dan melihat repository yang tersedia jika akses mengizinkan. |
+| `trivy image` | Memindai image untuk menemukan kerentanan pada package dan library. |
+| `docker scout` | Menganalisis image dan rekomendasi keamanan bila Docker Scout tersedia. |
+| `registry:2` | Image registry self-hosted berbasis Distribution Registry. |
+| Tag | Nama mutable yang menunjuk ke manifest image; dapat berpindah ke digest lain. |
+| Digest | Hash immutable manifest image yang cocok untuk deployment presisi. |

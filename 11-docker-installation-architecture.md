@@ -1,6 +1,6 @@
 # 11. Docker Installation & Architecture
 
-> Install Docker yang benar = dari repo resmi + paham tiap komponen. Jangan dari `apt install docker` sembarangan (nama paket bisa ketuker).
+> Instalasi Docker yang benar menggunakan repository resmi dan memahami setiap komponennya. Jangan memasang paket `docker` tanpa memeriksa sumbernya karena nama paket dapat berbeda.
 
 ## Tujuan Pembelajaran
 
@@ -35,7 +35,7 @@ $ docker --help | head -n 30
 $ docker system df
 ```
 
-CLI ≠ daemon. CLI error belum tentu daemon mati — cek `systemctl status docker`.
+CLI berbeda dari daemon. Error pada CLI belum tentu berarti daemon berhenti; periksa `systemctl status docker`.
 
 ## 3. dockerd
 
@@ -123,17 +123,23 @@ $ sudo systemctl restart docker
 $ docker info | grep -i "logging\|storage"
 ```
 
-Selalu `cat` + validasi JSON (`python3 -m json.tool`) sebelum restart.
+Selalu baca dan validasi JSON (`python3 -m json.tool`) sebelum melakukan restart.
 
-## Latihan
+## Fungsi Perintah
 
-1. Install resmi di VM lab, jalankan `hello-world` + `nginx:alpine`.
-2. `docker info`, catat storage driver dan root dir.
-3. Buat context ke VPS lab via SSH, `ps` dari laptop.
-4. Set `max-size/max-file`, restart, buktikan log terbatasi.
-
-## Rangkuman
-
-- Install dari repo Docker resmi, bukan paket `docker` random.
-- Paham CLI vs dockerd vs containerd vs socket.
-- Socket = privilegi root, context = remote aman, info/config = alat diagnosa.
+| Perintah | Fungsi |
+| --- | --- |
+| `apt update` / `apt install` | Memperbarui indeks paket dan memasang Docker Engine beserta komponennya. |
+| `curl` | Mengunduh key GPG atau menguji endpoint HTTP. |
+| `gpg --dearmor` | Mengubah key GPG ASCII menjadi keyring biner yang dapat dibaca APT. |
+| `tee` | Menulis konfigurasi repository dengan hak akses yang diberikan melalui `sudo`. |
+| `systemctl enable --now` | Mengaktifkan service saat boot sekaligus menjalankannya sekarang. |
+| `docker version` | Membandingkan versi CLI dan daemon. |
+| `docker info` | Menampilkan detail host dan daemon Docker. |
+| `docker run` | Menguji Engine dengan membuat dan menjalankan container. |
+| `docker context` | Membuat dan memilih endpoint daemon lokal atau remote. |
+| `docker system df` | Menampilkan penggunaan disk oleh image, container, volume, dan build cache. |
+| `docker.sock` | Unix socket yang menjadi endpoint API daemon Docker. Akses tulis setara dengan hak root. |
+| `cat` | Membaca file `daemon.json` atau konfigurasi CLI. |
+| `python3 -m json.tool` | Memvalidasi dan memformat file JSON. |
+| `grep` | Menyaring informasi tertentu dari output `docker info`. |

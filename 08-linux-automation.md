@@ -41,7 +41,7 @@ Contoh pola waktu:
 
 ## 3. systemd timers
 
-Pengganti cron yang bisa dependency, jitter, persistent (kejar ketinggalan setelah mati).
+Pengganti cron yang mendukung dependensi, jitter, dan mode persistent untuk menjalankan pekerjaan yang terlewat setelah sistem aktif kembali.
 
 ```bash
 # /etc/systemd/system/backup.service
@@ -119,13 +119,13 @@ Jangan auto-upgrade mayor (misal Postgres 14 → 16) tanpa snapshot + jadwal. Be
 
 ## 7. Automation Patterns
 
-Pola yang selamatkan kamu:
+Pola yang membuat otomasi lebih aman:
 
-1. **Log + alert:** tiap job tulis ke log + exit code jelas. Job diam = job mati diam-diam.
-2. **Lock + timeout:** `flock` + `timeout 300 skrip.sh` agar tidak gantung selamanya.
+1. **Log + alert:** setiap job menulis log dan menghasilkan exit code yang jelas. Job yang tidak memberi sinyal sulit dipantau.
+2. **Lock + timeout:** `flock` + `timeout 300 skrip.sh` agar pekerjaan tidak berjalan ganda atau menggantung tanpa batas.
 3. **Dry-run dulu:** tambah flag `--dry-run` untuk job destruktif (hapus, prune).
 4. **Staging dulu:** jalankan di 1 server staging 1 minggu sebelum ke semua prod.
-5. **Notifikasi gagal saja:** kirim alert hanya saat gagal biar tidak alert-fatigue.
+5. **Notifikasi saat gagal:** kirim alert saat gagal agar tidak menimbulkan kelelahan akibat terlalu banyak notifikasi.
 
 Contoh dengan timeout di cron:
 
@@ -133,15 +133,19 @@ Contoh dengan timeout di cron:
 0 3 * * * /usr/bin/timeout 1800 /opt/scripts/backup.sh >>/var/log/backup.log 2>&1
 ```
 
-## Latihan
+## Fungsi Perintah dan Sintaks
 
-1. Buat cron tiap 5 menit yang append `date` ke `/tmp/cron-test.log`. Buktikan jalan, hapus lagi.
-2. Ubah job itu jadi systemd timer + service, cek `list-timers` dan `journalctl`.
-3. Tambah `flock` ke 1 skrip lama kamu, simulasikan 2x jalan bersamaan.
-4. Audit semua timer aktif: `systemctl list-timers`, matikan yang tidak dikenal (di lab).
-
-## Rangkuman
-
-- Cron simpel, systemd timer powerful + terobservasi.
-- Selalu: PATH jelas, lock, log, timeout, idempotent.
-- Otomatisasi tanpa monitoring = otomatisasi masalah.
+| Perintah atau sintaks | Fungsi |
+| --- | --- |
+| `cron` | Daemon yang menjalankan pekerjaan berdasarkan jadwal. |
+| `crontab -e` / `crontab -l` | Mengedit atau menampilkan jadwal cron milik user saat ini. |
+| `systemctl` | Mengelola service dan timer systemd. |
+| `systemctl --user` | Mengelola unit systemd yang berjalan sebagai user biasa. |
+| `journalctl -u` | Membaca log service atau timer tertentu. |
+| `OnCalendar` | Menentukan jadwal kalender pada systemd timer. |
+| `Persistent=true` | Menjalankan timer yang terlewat setelah sistem kembali aktif. |
+| `flock` | Membuat lock agar dua instance job tidak berjalan bersamaan. |
+| `timeout` | Menghentikan perintah jika melewati batas waktu yang ditentukan. |
+| `--dry-run` | Menampilkan rencana tindakan tanpa menerapkan perubahan; dukungan bergantung pada program. |
+| `>>` / `2>&1` | Menambahkan output ke file log dan menggabungkan error ke output tersebut. |
+| `chmod +x` | Membuat skrip dapat dieksekusi. |

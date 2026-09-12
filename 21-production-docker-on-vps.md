@@ -30,7 +30,7 @@ $ sudo chown -R root:docker /opt/myapp
 $ sudo chmod 600 /opt/myapp/.env
 ```
 
-Jangan deploy dari `/tmp` atau home random yang tidak dibackup.
+Jangan melakukan deployment dari `/tmp` atau direktori home yang tidak dibackup.
 
 ## 2. Environment Management
 
@@ -140,7 +140,7 @@ services:
 
 ## 8. Resource Limits
 
-Biar 1 service bocor tidak bunuh host.
+Tujuannya agar satu service yang mengalami kebocoran resource tidak mematikan host.
 
 ```yaml
 services:
@@ -191,7 +191,7 @@ $ curl -f http://127.0.0.1/health || echo "GAGAL, rollback!"
 $ docker compose logs --since 5m | tail -n 50
 ```
 
-Untuk build sendiri: push tag baru ke registry (Bab 23) → ubah `API_TAG` → `up -d`. Jangan `build` di prod dari branch random.
+Untuk build sendiri: push tag baru ke registry (Bab 23), ubah `API_TAG`, lalu jalankan `up -d`. Jangan melakukan `build` di production dari branch yang tidak terverifikasi.
 
 ## 11. Rollback
 
@@ -201,22 +201,26 @@ Rollback = ganti tag ke sebelumnya + `up -d` + verifikasi. Harus <5 menit.
 $ API_TAG=1.3.9 docker compose up -d api
 $ docker compose ps
 $ curl -f http://127.0.0.1/health
-# kalau DB migrasi: siapkan down-migration / restore backup (Bab 24), jangan asal rollback code saja
+# Jika database bermigrasi, siapkan down-migration atau restore backup (Bab 24); jangan hanya melakukan rollback code.
 $ git log --oneline -n 5
 $ git diff HEAD~1 compose.yaml | head -n 60
 ```
 
 Latih rollback di staging tiap rilis besar. Rollback yang belum pernah dites = bukan rollback.
 
-## Latihan
+## Fungsi Perintah dan Field
 
-1. Susun `/opt/myapp` sesuai struktur + `.env.example` + gitignore.
-2. Terapkan limit + logging + healthcheck + restart, `config` lalu `up`.
-3. Reboot staging, catat waktu sampai semua healthy.
-4. Update tag dummy + rollback, ukur MTTR kamu.
-
-## Rangkuman
-
-- Prod = struktur + env/secret disiplin + 1 pintu proxy + TLS + health + limit + log + update/rollback terlatih.
-- Semua di Git kecuali secret. Semua secret dibackup terenkripsi.
-- Kalau belum pernah rollback, belum siap prod.
+| Perintah atau field | Fungsi |
+| --- | --- |
+| `docker compose --env-file` | Memilih file environment yang digunakan untuk substitusi dan konfigurasi service. |
+| `docker compose config` | Memvalidasi konfigurasi final sebelum deployment. |
+| `docker compose pull` | Mengambil image versi terbaru yang ditentukan oleh tag atau digest. |
+| `docker compose up -d` | Membuat atau memperbarui service di background. |
+| `docker compose ps` | Memeriksa status dan health service setelah deployment. |
+| `docker compose logs` | Membaca log service untuk validasi dan investigasi. |
+| `docker compose exec` | Menjalankan pemeriksaan atau perintah di dalam service aktif. |
+| `curl -f` | Menguji endpoint dan menghasilkan exit code gagal untuk status HTTP error. |
+| `cp` | Membuat backup konfigurasi sebelum perubahan. |
+| `git log` / `git diff` | Memeriksa history dan perbedaan konfigurasi atau versi. |
+| `restart` | Kebijakan untuk menjalankan ulang service setelah crash atau reboot. |
+| `healthcheck` | Pemeriksaan kesiapan aplikasi yang menjadi dasar validasi deployment. |

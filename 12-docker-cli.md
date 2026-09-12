@@ -1,6 +1,6 @@
 # 12. Docker CLI
 
-> Bab paling sering dibuka. Kuasai 13 perintah ini, 90% kerjaan Docker beres.
+> Bab ini berisi perintah yang paling sering digunakan. Kuasai 13 perintah berikut untuk menangani sebagian besar operasi Docker sehari-hari.
 
 ## Tujuan Pembelajaran
 
@@ -157,17 +157,22 @@ $ docker events -f 'container=web' &
 $ docker restart web
 ```
 
-Bagus untuk kejar "kenapa container mati sendiri?" bareng `logs` + `inspect`.
+Perintah ini berguna untuk mencari penyebab container berhenti bersama `docker logs` dan `docker inspect`.
 
-## Latihan
+## Fungsi Perintah dan Flag
 
-1. `run nginx`, `curl`, `exec`, `logs`, `stop`, `start`, `rm` tanpa lihat contekan.
-2. `inspect` dan temukan IP + mount + restart policy.
-3. `stats --no-stream` saat load, jelaskan siapa boros.
-4. Buka 2 terminal: `events` + `restart`, catat urutan event.
-
-## Rangkuman
-
-- `run/ps/exec/logs/inspect` = harian. `stats/events` = diagnosa.
-- Stop sopan dengan timeout cukup, `rm` sadar data hilang.
-- CLI rapi → Compose rapi (Bab 17).
+| Perintah atau flag | Fungsi |
+| --- | --- |
+| `docker run` | Membuat dan menjalankan container. `-d` berjalan di background, `--name` memberi nama, `-p` mem-publish port, `-v` memasang volume, `-e` menetapkan environment variable, dan `--rm` menghapus container setelah berhenti. |
+| `docker create` | Membuat container tanpa menjalankannya. |
+| `docker start` / `stop` / `restart` | Menjalankan, menghentikan dengan sinyal graceful, atau menjalankan ulang container. |
+| `docker rm` | Menghapus container. `-f` memaksa penghentian dan penghapusan. |
+| `docker ps` | Menampilkan container aktif; `-a` menyertakan container yang berhenti. |
+| `docker exec` | Menjalankan perintah tambahan di dalam container yang sedang berjalan. `-it` menyediakan terminal interaktif. |
+| `docker inspect` | Menampilkan metadata JSON lengkap tentang container, image, network, atau volume. |
+| `docker logs` | Membaca stdout dan stderr container. `-f` mengikuti log, sedangkan `--tail` membatasi jumlah baris. |
+| `docker cp` | Menyalin file antara host dan container. |
+| `docker stats` | Menampilkan penggunaan CPU, memory, jaringan, dan I/O per container. |
+| `docker events` | Menampilkan event daemon secara realtime, misalnya `start`, `die`, dan `oom`. |
+| `--format` | Mengubah bentuk output menggunakan template Go. |
+| `--restart` | Menetapkan kebijakan restart container, misalnya `unless-stopped`. |

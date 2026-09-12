@@ -10,7 +10,7 @@
 
 ## 1. docker0
 
-Bridge default (`172.17.0.0/16`) yang dibuat saat Docker install. Container tanpa `--network` nempel sini.
+Bridge default (`172.17.0.0/16`) dibuat saat Docker diinstal. Container tanpa opsi `--network` terhubung ke network ini.
 
 ```bash
 $ ip addr show docker0
@@ -127,7 +127,7 @@ $ cat /etc/docker/daemon.json
 # { "ipv6": true, "fixed-cidr-v6": "fd00:dead:beef::/48" }
 ```
 
-Jangan enable IPv6 asal di prod tanpa firewall + routing jelas.
+Jangan mengaktifkan IPv6 di production tanpa firewall dan routing yang sudah direncanakan.
 
 ## 10. Network Troubleshooting
 
@@ -148,17 +148,22 @@ Kasus umum:
 - `ping IP ok, ping nama gagal` → bukan di user-defined bridge / typo nama.
 - `curl host ok, dari luar gagal` → publish salah / UFW / bind `127.0.0.1` vs `0.0.0.0`.
 - Tiba-tiba putus setelah `iptables -F` → chain Docker rusak, restart Docker (hati-hati container ikut restart).
-- Konflik subnet dengan VPC/kantor → ganti subnet via `docker network create --subnet`.
+- Konflik subnet dengan VPC atau jaringan kantor → ganti subnet melalui `docker network create --subnet`.
 
-## Latihan
+## Fungsi Perintah
 
-1. Buat `app-net`, 2 container saling ping by name. Buktikan di `bridge` default gagal by name.
-2. Publish 1 service ke `127.0.0.1` saja, buktikan dari luar tidak bisa langsung.
-3. `inspect` network, gambar IP tiap container.
-4. Rusakkan 1 network (disconnect), sambungkan lagi via `network connect/disconnect`.
-
-## Rangkuman
-
-- Default bridge untuk coba, user-defined bridge untuk kerja serius.
-- Komunikasi via nama, publish minimal, isolasi per app.
-- `network inspect` + `exec ping/nslookup` = diagnosa 2 menit.
+| Perintah | Fungsi |
+| --- | --- |
+| `docker network ls` | Menampilkan network Docker yang tersedia. |
+| `docker network create` | Membuat network baru; `--subnet` menetapkan rentang IP. |
+| `docker network inspect` | Menampilkan driver, subnet, gateway, dan container yang terhubung. |
+| `docker network connect` / `disconnect` | Menambahkan atau melepas container dari network. |
+| `docker run --network` | Menjalankan container pada network tertentu, termasuk `host` atau `none`. |
+| `-p` / `--publish` | Memetakan port host ke port container. Format `IP:HOST:CONTAINER` membatasi alamat listen. |
+| `--expose` | Mendokumentasikan atau membuka port untuk komunikasi antarkontainer tanpa publish ke host. |
+| `ip addr` | Menampilkan interface dan alamat IP di host atau container. |
+| `ping` | Menguji konektivitas dasar, tetapi tidak selalu tersedia atau diizinkan pada container. |
+| `nslookup` / `getent hosts` | Menguji resolusi nama container atau service. |
+| `wget` / `curl` | Menguji koneksi aplikasi dan HTTP dari dalam atau luar container. |
+| `ss` | Memeriksa port yang sedang listen pada host. |
+| `iptables` | Memeriksa aturan NAT dan firewall yang memengaruhi jaringan Docker. |

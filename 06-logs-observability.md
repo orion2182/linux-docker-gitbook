@@ -1,6 +1,6 @@
 # 06. Logs & Observability
 
-> Server yang tidak diobservasi = bom waktu. Bab ini bikin kamu bisa jawab "kenapa mati?" dalam 5 menit.
+> Server yang tidak diobservasi merupakan sumber risiko operasional. Bab ini membantu menjawab pertanyaan "mengapa service berhenti?" dengan cepat.
 
 ## Tujuan Pembelajaran
 
@@ -134,17 +134,23 @@ $ sudo iftop  # kalau ada
 $ cat /proc/net/dev
 ```
 
-Paket drop/error naik di `ip -s link` = driver/MTU/firewall atau penuh.
+Paket drop atau error yang meningkat pada `ip -s link` dapat menunjukkan masalah driver, MTU, firewall, atau interface yang kelebihan beban.
 
-## Latihan
+## Fungsi Perintah
 
-1. `journalctl -p err -b` dan jelaskan 3 error teratas di VPS kamu.
-2. Cari siapa pemakan RAM/CPU terbesar dengan `ps aux`.
-3. Simulasikan log membesar, putar manual dengan `logrotate -f`.
-4. Buat alias `llogs='journalctl -p err --since "1 hour ago"'`.
-
-## Rangkuman
-
-- `journalctl -xeu <service>` + `dmesg` + `auth.log` = segitiga diagnosa.
-- Monitor 4 pilar: CPU, mem, disk, net — jangan tebak.
-- Log tanpa rotasi = insiden disk penuh berikutnya.
+| Perintah | Fungsi |
+| --- | --- |
+| `journalctl` | Membaca log journald berdasarkan service, waktu, prioritas, atau boot. |
+| `systemctl` | Memeriksa dan mengelola status service serta timer systemd. |
+| `tail -f` | Mengikuti tambahan baris log secara langsung. |
+| `grep` | Mencari pesan tertentu, misalnya `error`, `oom`, atau `failed`. |
+| `logger` | Mengirim pesan uji ke syslog/journald. |
+| `logrotate` | Memutar, mengompresi, dan menghapus log lama berdasarkan kebijakan retensi. |
+| `dmesg` | Menampilkan pesan kernel, termasuk OOM killer dan error filesystem. |
+| `top` / `htop` | Memantau proses dan penggunaan CPU atau RAM secara interaktif. |
+| `free` | Menampilkan RAM tersedia, cache, dan penggunaan swap. |
+| `vmstat` | Menampilkan statistik proses, memory, swap, dan I/O secara berkala. |
+| `df` / `du` | Memeriksa kapasitas filesystem dan ukuran direktori atau file. |
+| `iostat` / `iotop` | Menganalisis aktivitas dan latency I/O disk. |
+| `ss` / `ip -s link` | Memeriksa socket, interface, paket, error, dan drop jaringan. |
+| `ping` / `iftop` | Menguji latency dan memantau lalu lintas jaringan secara langsung. |

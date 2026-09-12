@@ -114,7 +114,7 @@ Dokumentasikan 1 halaman runbook + waktu tiap langkah (RTO nyata).
 
 ## 7. Backup Verification
 
-Tanpa verifikasi otomatis, backup basi tidak ketahuan.
+Tanpa verifikasi otomatis, backup yang rusak atau sudah tidak relevan dapat tidak terdeteksi.
 
 ```bash
 $ ls -lh /backup/*/ | tail -n 20
@@ -125,17 +125,21 @@ $ zcat db-*.sql.gz | head -n 5 | grep -i "PostgreSQL dump"
 $ ./scripts/restore-drill.sh staging && curl -f https://staging.contoh.com/health
 ```
 
-Alert kalau: ukuran 0 / tidak ada file <25 jam / `gzip -t` gagal / drill gagal. Catat hasil drill di log.
+Kirim alert jika ukuran backup nol, tidak ada backup dalam 25 jam terakhir, `gzip -t` gagal, atau restore drill gagal. Catat hasil drill di log.
 
-## Latihan
+## Fungsi Perintah
 
-1. Tentukan RPO/RTO untuk 1 app dummy (misal RPO 24 jam, RTO 2 jam).
-2. Backup volume + DB + config, kirim offsite (rclone ke 1 remote).
-3. Hapus volume di lab, restore dari backup, verifikasi data kembali.
-4. Jadwalkan drill bulanan di kalender + skrip verifikasi otomatis.
-
-## Rangkuman
-
-- Snapshot untuk cepat, dump+volume untuk portable, offsite untuk selamat.
-- Backup = 50%, restore teruji = 100%.
-- Otomatis + alert + drill = tidur nyenyak.
+| Perintah | Fungsi |
+| --- | --- |
+| `docker run -v` | Memasang volume saat membuat container sementara untuk backup atau restore. |
+| `docker compose exec` | Menjalankan `pg_dump`, `psql`, atau perintah backup lain di dalam service database. |
+| `pg_dump` | Membuat logical dump database PostgreSQL. |
+| `psql` | Membaca dan menjalankan SQL pada database PostgreSQL, termasuk saat restore. |
+| `mysqldump` | Membuat logical dump database MySQL atau MariaDB. |
+| `tar` | Membuat atau mengekstrak arsip file dan volume. |
+| `gzip` / `zcat` | Mengompresi atau membaca file gzip tanpa mengekstraknya ke disk terlebih dahulu. |
+| `rclone` / `aws s3` / `rsync` | Mengirim backup ke storage offsite atau server backup. |
+| `openssl` / `gpg` / `age` | Mengenkripsi backup sebelum dikirim ke lokasi offsite. |
+| `find` | Menemukan dan menghapus backup yang melewati masa retensi jika kebijakannya sudah diverifikasi. |
+| `curl -f` | Memvalidasi endpoint health setelah proses restore. |
+| `diff` | Membandingkan hasil restore dengan data sumber atau backup yang diharapkan. |
